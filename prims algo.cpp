@@ -4,16 +4,39 @@
 using namespace std;
 using namespace std::chrono;
 
-#define V 7  // Number of vertices in the graph
+#define V 5  // Number of vertices in the graph
+
+// Structure to represent an edge
+struct Edge {
+    int src, dest, weight;
+};
+
+// Structure to represent a graph
+struct Graph {
+    int V, E;
+    vector<Edge> edges;
+};
+
+// Find function for Disjoint Set (used in Kruskal)
+int find(int parent[], int i) {
+    if (parent[i] == -1)
+        return i;
+    return find(parent, parent[i]);
+}
+
+// Union function for Disjoint Set
+void Union(int parent[], int x, int y) {
+    int xroot = find(parent, x);
+    int yroot = find(parent, y);
+    parent[xroot] = yroot;
+}
 
 // Function to find the vertex with the minimum key value
 int minKey(int key[], bool mstSet[]) {
     int min = INT_MAX, min_index;
-    
     for (int v = 0; v < V; v++)
         if (!mstSet[v] && key[v] < min)
             min = key[v], min_index = v;
-
     return min_index;
 }
 
@@ -24,22 +47,21 @@ void printMST(int parent[], int graph[V][V]) {
         cout << parent[i] << " - " << i << " \t" << graph[parent[i]][i] << "\n";
 }
 
-// Function to implement Prim's MST algorithm
+// Function to implement Prim's Algorithm
 void primMST(int graph[V][V]) {
-    int parent[V];  // Stores the constructed MST
-    int key[V];     // Key values for minimum edge selection
-    bool mstSet[V]; // True if vertex is included in MST
+    int parent[V];  
+    int key[V];     
+    bool mstSet[V];
 
-    // Initialize all keys as INFINITE and mstSet[] as false
     for (int i = 0; i < V; i++)
         key[i] = INT_MAX, mstSet[i] = false;
 
-    key[0] = 0;    // Include first vertex
-    parent[0] = -1; // First node is always the root
+    key[0] = 0;
+    parent[0] = -1;
 
     for (int count = 0; count < V - 1; count++) {
-        int u = minKey(key, mstSet); // Get the minimum key vertex
-        mstSet[u] = true; // Include it in MST
+        int u = minKey(key, mstSet);
+        mstSet[u] = true;
 
         for (int v = 0; v < V; v++) {
             if (graph[u][v] && !mstSet[v] && graph[u][v] < key[v])
@@ -50,7 +72,32 @@ void primMST(int graph[V][V]) {
     printMST(parent, graph);
 }
 
-// Driver code
+// Function to implement Kruskal's Algorithm
+void kruskalMST(Graph& graph) {
+    vector<Edge> result;
+    int parent[V];
+    memset(parent, -1, sizeof(parent));
+
+    // Sorting edges by weight
+    sort(graph.edges.begin(), graph.edges.end(), [](Edge a, Edge b) {
+        return a.weight < b.weight;
+    });
+
+    for (Edge e : graph.edges) {
+        int x = find(parent, e.src);
+        int y = find(parent, e.dest);
+
+        if (x != y) {
+            result.push_back(e);
+            Union(parent, x, y);
+        }
+    }
+
+    cout << "Edge \tWeight\n";
+    for (auto e : result)
+        cout << e.src << " - " << e.dest << " \t" << e.weight << "\n";
+}
+
 int main() {
     int graph[V][V];
 
@@ -59,15 +106,35 @@ int main() {
         for (int j = 0; j < V; j++)
             cin >> graph[i][j];
 
-    auto start = high_resolution_clock::now(); // Start time measurement
+    // Construct Graph for Kruskal's Algorithm
+    Graph g;
+    g.V = V;
+    g.E = 0;
+    
+    for (int i = 0; i < V; i++) {
+        for (int j = i + 1; j < V; j++) {
+            if (graph[i][j]) {
+                g.edges.push_back({i, j, graph[i][j]});
+                g.E++;
+            }
+        }
+    }
 
-    primMST(graph); // Run Prim's Algorithm
+    auto start_prim = high_resolution_clock::now();
+    cout << "\nPrim's Algorithm:\n";
+    primMST(graph);
+    auto end_prim = high_resolution_clock::now();
+    auto duration_prim = duration_cast<microseconds>(end_prim - start_prim);
 
-    auto end = high_resolution_clock::now(); // End time measurement
-    auto duration = duration_cast<microseconds>(end - start);
+    auto start_kruskal = high_resolution_clock::now();
+    cout << "\nKruskal's Algorithm:\n";
+    kruskalMST(g);
+    auto end_kruskal = high_resolution_clock::now();
+    auto duration_kruskal = duration_cast<microseconds>(end_kruskal - start_kruskal);
 
-    cout << "Execution time: " << duration.count() << " microseconds\n";
+    cout << "\nExecution time:\n";
+    cout << "Prim's Algorithm: " << duration_prim.count() << " microseconds\n";
+    cout << "Kruskal's Algorithm: " << duration_kruskal.count() << " microseconds\n";
 
     return 0;
 }
-
