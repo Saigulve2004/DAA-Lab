@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include <iostream>
 #include <chrono>
 
 using namespace std;
@@ -16,10 +16,16 @@ int partition(Activity arr[], int low, int high) {
     for (int j = low; j < high; j++) {
         if (arr[j].finish < pivot.finish) {
             i++;
-            swap(arr[i], arr[j]);
+            // Swap arr[i] and arr[j]
+            Activity temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
         }
     }
-    swap(arr[i + 1], arr[high]);
+    // Swap arr[i + 1] and arr[high] (or pivot)
+    Activity temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
     return i + 1;
 }
 
@@ -38,13 +44,13 @@ void printMaxActivities(Activity arr[], int n) {
 
     cout << "Following activities are selected:\n";
 
-    int i = 0;
+    int i = 0; // The first activity is always selected
     cout << "(" << arr[i].start << ", " << arr[i].finish << ")";
 
     for (int j = 1; j < n; j++) {
         if (arr[j].start >= arr[i].finish) {
             cout << ", (" << arr[j].start << ", " << arr[j].finish << ")";
-            i = j;
+            i = j; // Update the last selected activity
         }
     }
     cout << endl;
@@ -73,4 +79,3 @@ int main() {
 
     return 0;
 }
-
