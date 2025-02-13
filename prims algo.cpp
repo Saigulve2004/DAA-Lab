@@ -1,15 +1,12 @@
 #include <bits/stdc++.h>
-#include <chrono>
-
 using namespace std;
-using namespace std::chrono;
 
-#define V 5  // Number of vertices in the graph
+#define V 3 // Number of vertices
 
 // Function to find the vertex with the minimum key value
 int minKey(int key[], bool mstSet[]) {
     int min = INT_MAX, min_index;
-    
+
     for (int v = 0; v < V; v++)
         if (!mstSet[v] && key[v] < min)
             min = key[v], min_index = v;
@@ -21,36 +18,41 @@ int minKey(int key[], bool mstSet[]) {
 void printMST(int parent[], int graph[V][V]) {
     cout << "Edge \tWeight\n";
     for (int i = 1; i < V; i++)
-        cout << parent[i] << " - " << i << " \t" << graph[parent[i]][i] << "\n";
+        cout << parent[i] << " - " << i << " \t" << graph[i][parent[i]] << "\n";
 }
 
-// Function to implement Prim's MST algorithm
+// Function to implement Prim's Algorithm
 void primMST(int graph[V][V]) {
-    int parent[V];  // Stores the constructed MST
-    int key[V];     // Key values for minimum edge selection
-    bool mstSet[V]; // True if vertex is included in MST
+    int parent[V];  // Array to store the MST
+    int key[V];     // Key values used to pick the minimum weight edge
+    bool mstSet[V]; // To represent the set of vertices included in MST
 
-    // Initialize all keys as INFINITE and mstSet[] as false
+    // Initialize all keys as INFINITE and MST set as false
     for (int i = 0; i < V; i++)
         key[i] = INT_MAX, mstSet[i] = false;
 
-    key[0] = 0;    // Include first vertex
-    parent[0] = -1; // First node is always the root
+    // Always include the first vertex in MST.
+    key[0] = 0;     // Make key 0 so that this vertex is picked first
+    parent[0] = -1; // First node is always the root of MST
 
+    // The MST will have V-1 edges
     for (int count = 0; count < V - 1; count++) {
-        int u = minKey(key, mstSet); // Get the minimum key vertex
-        mstSet[u] = true; // Include it in MST
+        int u = minKey(key, mstSet); // Pick the minimum key vertex not in MST
+        mstSet[u] = true;            // Include the picked vertex in MST
 
+        // Update key values of adjacent vertices
         for (int v = 0; v < V; v++) {
-            if (graph[u][v] && !mstSet[v] && graph[u][v] < key[v])
+            if (graph[u][v] && !mstSet[v] && graph[u][v] < key[v]) {
                 parent[v] = u, key[v] = graph[u][v];
+            }
         }
     }
 
+    // Print the MST
     printMST(parent, graph);
 }
 
-// Driver code
+// Main function
 int main() {
     int graph[V][V];
 
@@ -59,14 +61,9 @@ int main() {
         for (int j = 0; j < V; j++)
             cin >> graph[i][j];
 
-    auto start = high_resolution_clock::now(); // Start time measurement
-
-    primMST(graph); // Run Prim's Algorithm
-
-    auto end = high_resolution_clock::now(); // End time measurement
-    auto duration = duration_cast<microseconds>(end - start);
-
-    cout << "Execution time: " << duration.count() << " microseconds\n";
+    cout << "\nPrim's Algorithm - Minimum Spanning Tree:\n";
+    primMST(graph);
 
     return 0;
 }
+
