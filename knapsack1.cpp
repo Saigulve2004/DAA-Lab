@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono> // Include the chrono library for timing
 using namespace std;
 
 // Function to solve the 0/1 Knapsack problem
@@ -28,7 +29,7 @@ int knapsack(int weights[], int values[], int n, int W) {
         cout << endl;
     }
 
-    return 0 ;
+    return dp[n][W]; // Return the maximum value
 }
 
 int main() {
@@ -54,8 +55,17 @@ int main() {
     cout << "Enter the maximum capacity of the knapsack: ";
     cin >> W;
 
+    // Start timing
+    auto start = chrono::high_resolution_clock::now();
+
     int max_value = knapsack(weights, values, n, W);
+
+    // Stop timing
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double, std::milli> duration = end - start; // Duration in milliseconds
+
     cout << "Maximum value in Knapsack: " << max_value << endl;
+    cout << "Time taken: " << duration.count() << " ms" << endl; // Output the time taken
 
     return 0;
 }
